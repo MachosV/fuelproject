@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"models"
 	"time"
+	"log"
 )
 
 var sessions map[string]*models.Session
@@ -26,6 +27,8 @@ func CheckAuth(sessionid string) bool {
 	return true
 }
 
+//Returns a session string.
+//Otherwise returns empty string.
 func DoLogin(username string, password string) string{
 	var db = storage.GetDb()
 	var form_password,err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -34,8 +37,9 @@ func DoLogin(username string, password string) string{
 		"WHERE" +
 		"username="+username+" or " +
 		"email="+username)
+	//nomizw edw skaei
 	if err == sql.ErrNoRows{
-		return "No such user"
+		return ""
 	}
 	for results.Next(){
 		results.Scan(system_password)
@@ -44,8 +48,6 @@ func DoLogin(username string, password string) string{
 		return ""
 	}
 	return CreateSession()
-
-
 }
 
 func DoLogout(id string){
@@ -80,7 +82,7 @@ func SetSession(sessionid string, key string, value string){
 }
 
 func GetSession(sessionid string) *models.Session{
-	return nil
+	return sessions[sessionid]
 }
 
 func DeleteSession(sessionid string){
@@ -89,7 +91,8 @@ func DeleteSession(sessionid string){
 
 func SessionGC(){
 	for{
-		time.Sleep(60*10)
+		time.Sleep(10 * time.Second)
+		log.Println("Session GC started")
 		for key,_ := range sessions{
 			t1 := sessions[key].GetTimestamp()
 			if time.Since(t1).Minutes() > 1{
