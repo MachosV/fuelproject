@@ -1,9 +1,9 @@
 package views
 
 import (
+	"data"
 	"html/template"
 	"net/http"
-	"data"
 )
 
 func IndexView(w http.ResponseWriter, r *http.Request) {

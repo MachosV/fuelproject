@@ -14,7 +14,7 @@ import (
 var db *sql.DB
 
 func init() {
-	db, _ = sql.Open("mysql", "root:123456789@tcp(localhost:3306)/fuelproject")
+	db, _ = sql.Open("mysql", "root:123456789@tcp(localhost:3306)/iot")
 	var err = db.Ping()
 	if err != nil {
 		log.Fatal("Database connection failed")

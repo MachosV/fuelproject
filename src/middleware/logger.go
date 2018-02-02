@@ -1,18 +1,16 @@
 package middleware
 
-import "log"
+import (
+	"net/http"
+	"log"
+)
 
-var loglevel int
-
-func init() {
-	log.Printf("logger says hi\n")
-	loglevel = 4
-}
-
-func WriteLog(msg string) {
-	log.Printf("%s\n", msg)
-}
-
-func GetLogLevel() int {
-	return loglevel
+func Log() Middleware{
+	return func(h http.HandlerFunc) http.HandlerFunc {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+			log.Println("Before")
+			defer log.Println("After")
+			h.ServeHTTP(w,r)
+		})
+	}
 }

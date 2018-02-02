@@ -1,0 +1,12 @@
+{{define "title"}}
+Welcome
+{{end}}
+{{define "content"}}
+<form action="/createuser" method="POST">
+    Email:<input type="text" name="email" placeholder="Email" required ><br>
+    Username:<input type="text" name="username" placeholder="Username" required ><br>
+    Password:<input type="password" name="password1" placeholder="Password" required ><br>
+    Confirm your password:<input type="password" name="password2" placeholder="Password" required><br>
+    <input type="submit" value="Signup">
+</form>
+{{end}}
