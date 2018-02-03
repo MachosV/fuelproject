@@ -24,10 +24,6 @@ func init() {
 		t, err = t.ParseFiles("./templates/"+filename, "./templates/base.html")
 		templates[filename] = t
 	}
-	for key := range templates {
-		log.Println("Found", key, "template")
-	}
-	log.Println("Total templates", len(templates))
 }
 
 func GetTemplate(templateName string) *template.Template {
