@@ -16,7 +16,9 @@ func main() {
 	http.HandleFunc("/about",views.AboutView)
 	http.HandleFunc("/createuser",views.CreateUserView)
 	http.HandleFunc("/signup",views.SignupView)
-	http.Handle("/asdf",middleware.WithMiddleware(views.SecretView,middleware.Log()))
+	http.Handle("/secret",middleware.WithMiddleware(views.SecretView,
+	middleware.WithLogin()))
+	http.HandleFunc("/login",views.Login)
 	http.HandleFunc("/",views.IndexView)
 	http.ListenAndServe(":8080", nil)
 }

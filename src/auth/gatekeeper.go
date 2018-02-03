@@ -5,12 +5,9 @@ import (
 	"math/rand"
 	"fmt"
 	"storage"
-	"database/sql"
 	"golang.org/x/crypto/bcrypt"
-	"bytes"
 	"models"
 	"time"
-	"log"
 )
 
 var sessions map[string]*models.Session
@@ -31,20 +28,20 @@ func CheckAuth(sessionid string) bool {
 //Otherwise returns empty string.
 func DoLogin(username string, password string) string{
 	var db = storage.GetDb()
-	var form_password,err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	var system_password []byte
-	results, err := db.Query("SELECT password FROM accounts" +
-		"WHERE" +
-		"username="+username+" or " +
-		"email="+username)
-	//nomizw edw skaei
-	if err == sql.ErrNoRows{
+	var form_password = []byte(password)
+	results, err := db.Query("SELECT password FROM accounts " +
+		"WHERE " +
+		"username=? or " +
+		"email=?;",username,username)
+	if err != nil{
 		return ""
 	}
 	for results.Next(){
-		results.Scan(system_password)
+		results.Scan(&system_password)
 	}
-	if !bytes.Equal(form_password, system_password){
+	err = bcrypt.CompareHashAndPassword(system_password,form_password)
+	if err != nil{
 		return ""
 	}
 	return CreateSession()
@@ -92,7 +89,6 @@ func DeleteSession(sessionid string){
 func SessionGC(){
 	for{
 		time.Sleep(10 * time.Second)
-		log.Println("Session GC started")
 		for key,_ := range sessions{
 			t1 := sessions[key].GetTimestamp()
 			if time.Since(t1).Minutes() > 1{
