@@ -5,7 +5,6 @@ import (
 	"data"
 	"html/template"
 	"auth"
-	"time"
 )
 
 
@@ -15,12 +14,11 @@ func GetLogin(w http.ResponseWriter, r *http.Request){
 }
 
 func PostLogin(w http.ResponseWriter, r *http.Request){
-	var sessionid string = auth.DoLogin(r.PostFormValue("username"), r.PostFormValue("password"))
-	if sessionid == ""{
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	var cookie *http.Cookie = auth.DoLogin(r.PostFormValue("username"), r.PostFormValue("password"))
+	if cookie == nil{
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
 	}
-	cookie := http.Cookie{Name:"gses", Value:sessionid, Expires:time.Now().Add(2*time.Minute)}
-	http.SetCookie(w,&cookie)
+	http.SetCookie(w,cookie)
 	http.Redirect(w,r,"/secret",http.StatusMovedPermanently)
 }
 

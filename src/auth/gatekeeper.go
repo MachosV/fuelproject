@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"models"
 	"time"
+	"net/http"
 )
 
 var sessions map[string]*models.Session
@@ -26,7 +27,7 @@ func CheckAuth(sessionid string) bool {
 
 //Returns a session string.
 //Otherwise returns empty string.
-func DoLogin(username string, password string) string{
+func DoLogin(username string, password string) *http.Cookie{
 	var db = storage.GetDb()
 	var system_password []byte
 	var form_password = []byte(password)
@@ -35,14 +36,14 @@ func DoLogin(username string, password string) string{
 		"username=? or " +
 		"email=?;",username,username)
 	if err != nil{
-		return ""
+		return nil
 	}
 	for results.Next(){
 		results.Scan(&system_password)
 	}
 	err = bcrypt.CompareHashAndPassword(system_password,form_password)
 	if err != nil{
-		return ""
+		return nil
 	}
 	return CreateSession()
 }
@@ -51,7 +52,7 @@ func DoLogout(id string){
 	delete(sessions,id)
 }
 
-func CreateSession() string{
+func CreateSession() *http.Cookie{
 	var b []byte
 	var bdecoded string
 	for {
@@ -70,7 +71,13 @@ func CreateSession() string{
 	session.SetId(bdecoded)
 	session.SetTimestamp()
 	sessions[bdecoded] = session
-        return bdecoded
+	var cookie *http.Cookie = &http.Cookie{
+		Name: "sessionid",
+		Value: bdecoded,
+		Expires: time.Now().Add(2*time.Minute),
+		HttpOnly: true,
+	}
+        return cookie
 }
 
 func SetSession(sessionid string, key string, value string){
@@ -91,7 +98,7 @@ func SessionGC(){
 		time.Sleep(10 * time.Second)
 		for key,_ := range sessions{
 			t1 := sessions[key].GetTimestamp()
-			if time.Since(t1).Minutes() > 1{
+			if time.Since(t1).Minutes() > 2{
 				delete(sessions,key)
 			}
 		}

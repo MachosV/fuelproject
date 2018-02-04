@@ -8,7 +8,7 @@ import (
 func WithLogin() Middleware{
 	return func(h http.HandlerFunc) http.HandlerFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-			cookie, err := r.Cookie("gses")
+			cookie, err := r.Cookie("sessionid")
 			if err != nil{
 				http.Redirect(w, r, "/login",http.StatusMovedPermanently)
 				return
